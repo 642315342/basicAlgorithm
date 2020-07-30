@@ -1,0 +1,128 @@
+<template>
+    <div class="contain" ref="contain"  @scroll="handleScroll">
+      <div :style="{transform: getTransform }">
+        <div v-for="item in visibleList" :data-index="item.id" :key="item.id" class="items" ref="items">
+          <span class="id">{{item.id}}</span> {{item.value}}
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <script>
+  let data = [];
+  for (let id = 0; id < 1000; id++) {
+    let str = ''
+    let random = Math.ceil(Math.random()*200 + 20)
+    for(let i = 0; i < random; i++) {
+       str += '阿斯达'
+    }
+    data.push({
+      id,
+      value: str // 长文本
+    });
+  }
+  
+  export default {
+    data() {
+      return {
+        expectHeight: 100, // item 预估高度
+        dataList: data, // 原始数据
+        screenHeight: 0, // 容器高度
+        itemSize: 0, // item总个数
+        positions: [], // 各个item位置信息
+        startIndex: 0,
+        endIndex: 0,
+        startOffset: 0
+      };
+    },
+    computed: {
+      // 能一次显示 item 数量
+      visibleCount() {
+        return Math.ceil(this.screenHeight / this.expectHeight) + 2
+      },
+      // 实际展示List
+      visibleList() {
+        return this.dataList.slice(this.startIndex, Math.min(this.endIndex, this.itemSize)) 
+      },
+      //偏移量对应的style
+      getTransform(){
+        return `translate3d(0,${this.startOffset}px,0)`;
+      },
+    },
+    mounted() {
+      this.itemSize = this.dataList.length
+      this.screenHeight = this.$refs.contain.offsetHeight
+      this.endIndex = this.startIndex + this.visibleCount
+      this.getPositions()
+    },
+    updated() {
+      let nodes = this.$refs.items
+      nodes.forEach(item => {
+        let rect = item.getBoundingClientRect()
+        let nodeHeight = rect.height // 节点真实高度
+        let index = item.dataset.index
+        let sub = nodeHeight - this.positions[index].height // 本身高度 与 存储中的高度 差
+        // 第一次 123456  滑动 渲染 成 234567  23456都是不需要重新计算位置信息的
+        if(sub) {
+          this.positions[index].height = nodeHeight
+          // 后面每一项都需要改变bottom
+          for(let i = index; i < itemSize; i++) {
+            this.positions[i].bottom += sub
+          }
+        }
+      });
+    },
+    methods: {
+      getPositions() {
+        this.positions = this.dataList.map((item, index) => {
+          return {
+            height: this.expectHeight,
+            bottom: (index + 1) * this.expectHeight,
+          }
+        })
+      },
+      handleScroll() {
+         //当前滚动位置
+        let scrollTop = this.$refs.contain.scrollTop;
+         //此时的开始索引
+        this.startIndex = this.getStartIndex(scrollTop);
+        this.endIndex = this.startIndex + this.visibleCount
+        //此时的偏移量
+        this.startOffset = this.startIndex > 0 ? this.positions[this.startIndex-1].bottom : 0
+      },
+      getStartIndex(scrollTop) {
+        let startIndex = null;
+        this.positions.forEach((item, index) => {
+          if(this.positions[0].bottom > scrollTop) {
+            startIndex = 0
+            return
+          }else if(this.positions[index].bottom === scrollTop) {
+            startIndex = index
+            return
+          } else if(this.positions[index].bottom < scrollTop && this.positions[index+1].bottom > scrollTop) {
+            startIndex = index+1
+            return
+          }
+        })
+        return startIndex
+      }
+    }
+  };
+  </script>
+  
+  <style lang="stylus">
+  .contain {
+    height 30rem;
+    overflow auto
+  }
+  .items {
+    padding: 30px;
+    font-size: 20px;
+    border-bottom: 1px solid #333;
+  }
+  .id {
+    color: red;
+    font-size: 30px;
+  }
+  </style>
+  

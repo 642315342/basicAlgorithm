@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+    
+    <div id="father">
+        1111<br>
+        <input type="text" id="son">
+    </div>
+
+    <script>
+        // 子组件向父组件冒泡它不存在的事件，父组件能触发吗
+        document.querySelector('#father').addEventListener('keyup', function() {
+            console.log('keyup');
+        })
+        document.querySelector('#father').addEventListener('input', function() {
+            console.log('input');
+        })
+        document.querySelector('#father').addEventListener('change', function() {
+            console.log('change');
+        })
+        document.querySelector('#father').addEventListener('focus', function() {
+            console.log('focus');
+        })
+        document.querySelector('#father').addEventListener('blur', function() {
+            console.log('blur');
+        })
+        document.querySelector('#father').addEventListener('keyup', function() {
+            console.log('keyup1111');
+        }, true)
+        document.querySelector('#father').addEventListener('input', function() {
+            console.log('input1111');
+        }, true)
+        document.querySelector('#father').addEventListener('change', function() {
+            console.log('change1111');
+        }, true)
+        document.querySelector('#father').addEventListener('focus', function() {
+            console.log('focus1111');
+        }, true)
+        document.querySelector('#father').addEventListener('blur', function() {
+            console.log('blur1111');
+        }, true)
+    </script>
+
+</body>
+
+</html>
